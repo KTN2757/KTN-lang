@@ -21,47 +21,37 @@ class Tokenizer:
         self.tokenize()
 
     def tokenize(self):
-        num_buf = ""
-        letter_buf = ""
-        num_start = 0
-        letter_start = 0
-        for i in range(len(self.text)):
-            if self.text[i] in self.DIGITS or (self.text[i] == "." and num_buf):
-                if letter_buf:
-                    self.tokens.append(Token("VAR", letter_buf, letter_start))
-                    letter_buf = ""
-                if not num_buf:
-                    num_start = i
-                num_buf += self.text[i]
+        i = 0
+        while i < len(self.text):
+            i = self.next_token(i)
 
-            elif self.text[i] in self.LETTERS:
-                if num_buf:
-                    self.tokens.append(Token("NUMBER", num_buf, num_start))
-                    num_buf = ""
-                if not letter_buf:
-                    letter_start = i
-                letter_buf += self.text[i]
+    def next_token(self, i):
+        c = self.text[i]
+        if c in self.DIGITS:
+            return self.read_number(i)
+        elif c in self.LETTERS:
+            return self.read_var(i)
+        elif c in self.SYMBOLS:
+            self.tokens.append(Token(self.SYMBOLS[c], c, i))
+        elif c == "\n":
+            self.tokens.append(Token("END", c, i))
+        elif c not in (" ", "\t"):
+            self.tokens.append(Token("ILLEGAL", c, i))
+        return i + 1
 
-            else:
-                if num_buf:
-                    self.tokens.append(Token("NUMBER", num_buf, num_start))
-                    num_buf = ""
-                if letter_buf:
-                    self.tokens.append(Token("VAR", letter_buf, letter_start))
-                    letter_buf = ""
-                if self.text[i] in self.SYMBOLS:
-                    self.tokens.append(
-                        Token(self.SYMBOLS[self.text[i]], self.text[i], i))
-                elif self.text[i] not in (" ", "\t", "\n"):
-                    self.tokens.append(Token("ILLEGAL", self.text[i], i))
+    def read_number(self, start):
+        i = start
+        while i < len(self.text) and (self.text[i] in self.DIGITS or (self.text[i] == "." and i > start)):
+            i += 1
+        self.tokens.append(Token("NUMBER", self.text[start:i], start))
+        return i
 
-            if self.text[i] == "\n":
-                self.tokens.append(Token("END", self.text[i], i))
-
-        if num_buf:
-            self.tokens.append(Token("NUMBER", num_buf, num_start))
-        if letter_buf:
-            self.tokens.append(Token("VAR", letter_buf, letter_start))
+    def read_var(self, start):
+        i = start
+        while i < len(self.text) and self.text[i] in self.LETTERS:
+            i += 1
+        self.tokens.append(Token("VAR", self.text[start:i], start))
+        return i
 
     def list_tokens(self):
         for i in self.tokens:
