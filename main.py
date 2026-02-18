@@ -1,6 +1,6 @@
 class Token:
     def __init__(self, type, value, pos):
-        self.type = type  # Symbol or Number or END
+        self.type = type
         self.value = value
         self.pos = pos
 
@@ -20,7 +20,7 @@ class Tokenizer:
         num_buf = ""
         num_start = 0
         for i in range(len(self.text)):
-            if self.text[i] in self.DIGITS:
+            if self.text[i] in self.DIGITS or self.text[i] == ".":
                 if not num_buf:
                     num_start = i
                 num_buf += self.text[i]
