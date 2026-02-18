@@ -9,47 +9,31 @@ class Tokenizer:
     def __init__(self, text):
         self.text = text
         self.DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-        self.SYMBOLS = ['+', '-', '*', '/', '(', ')']
+        self.SYMBOLS = {"+": "PLUS", "-": "MINUS", "*": "STAR",
+                        "/": "SLASH", "(": "LPAREN", ")": "RPAREN"}
         self.tokens = []
 
     def run(self):
         self.tokenize()
 
     def tokenize(self):
+        num_buf = ""
+        num_start = 0
         for i in range(len(self.text)):
             if self.text[i] in self.DIGITS:
-                self.tokens.append(Token("Number", self.text[i], i))
-            if self.text[i] in self.SYMBOLS:
-                # PLUS MINUS STAR SLASH LPAREN RPAREN
-                if self.text[i] == "+":
-                    self.tokens.append(Token("PLUS", self.text[i], i))
-                if self.text[i] == "-":
-                    self.tokens.append(Token("MINUS", self.text[i], i))
-                if self.text[i] == "*":
-                    self.tokens.append(Token("STAR", self.text[i], i))
-                if self.text[i] == "/":
-                    self.tokens.append(Token("SLASH", self.text[i], i))
-                if self.text[i] == "(":
-                    self.tokens.append(Token("LPAREN", self.text[i], i))
-                if self.text[i] == ")":
-                    self.tokens.append(Token("RPAREN", self.text[i], i))
-            if self.text[i] == "\n":
-                self.tokens.append(Token("END", self.text[i], i))
+                if not num_buf:
+                    num_start = i
+                num_buf += self.text[i]
 
-        self.clean_up()
-
-    def clean_up(self):
-        tokens = []
-        num_buf = ""
-        for token in self.tokens:
-            if token.type == "Number":
-                num_buf += token.value
             else:
                 if num_buf:
-                    tokens.append(Token("Number", num_buf, token.pos))
+                    self.tokens.append(Token("NUMBER", num_buf, num_start))
                     num_buf = ""
-                tokens.append(token)
-        self.tokens = tokens
+                if self.text[i] in self.SYMBOLS:
+                    self.tokens.append(
+                        Token(self.SYMBOLS[self.text[i]], self.text[i], i))
+            if self.text[i] == "\n":
+                self.tokens.append(Token("END", self.text[i], i))
 
     def list_tokens(self):
         for i in self.tokens:
