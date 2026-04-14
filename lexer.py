@@ -9,11 +9,18 @@ class Token:
 
 
 class Tokenizer:
-    def __init__(self, text):
+    def __init__(self, text: str):
         self.text = text
         self.DIGITS = string.digits
-        self.SYMBOLS = {"+": "PLUS", "-": "MINUS", "*": "STAR",
-                        "/": "SLASH", "(": "LPAREN", ")": "RPAREN", "=": "EQUAL"}
+        self.SYMBOLS = {
+            "+": "PLUS",
+            "-": "MINUS",
+            "*": "STAR",
+            "/": "SLASH",
+            "(": "LPAREN",
+            ")": "RPAREN",
+            "=": "EQUAL",
+        }
         self.LETTERS = string.ascii_letters
         self.tokens = []
 
@@ -25,7 +32,7 @@ class Tokenizer:
         while i < len(self.text):
             i = self.next_token(i)
 
-    def next_token(self, i):
+    def next_token(self, i: int) -> int:
         c = self.text[i]
         if c in self.DIGITS:
             return self.read_number(i)
@@ -39,23 +46,26 @@ class Tokenizer:
             self.tokens.append(Token("ILLEGAL", c, i))
         return i + 1
 
-    def read_number(self, start):
+    def read_number(self, start: int) -> int:
         i = start
-        while i < len(self.text) and (self.text[i] in self.DIGITS or (self.text[i] == "." and i > start)):
+        while i < len(self.text) and (
+            self.text[i] in self.DIGITS or (self.text[i] == "." and i > start)
+        ):
             i += 1
         self.tokens.append(Token("NUMBER", self.text[start:i], start))
         return i
 
-    def read_var(self, start):
+    def read_var(self, start: int) -> int:
         i = start
         while i < len(self.text) and self.text[i] in self.LETTERS:
             i += 1
         self.tokens.append(Token("VAR", self.text[start:i], start))
         return i
 
-    def list_tokens(self):
+    def list_tokens(self) -> list[Token]:
         for i in self.tokens:
             print(f"Token[{i.pos}]: {i.type}({i.value})")
+        return self.tokens
 
 
 if __name__ == "__main__":
